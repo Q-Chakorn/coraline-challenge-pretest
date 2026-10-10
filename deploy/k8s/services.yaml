@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  namespace: dev
+spec:
+  type: ClusterIP
+  selector:
+    app: hello-world
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  namespace: staging
+spec:
+  type: ClusterIP
+  selector:
+    app: hello-world
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world
+  namespace: prod
+spec:
+  type: ClusterIP
+  selector:
+    app: hello-world
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
