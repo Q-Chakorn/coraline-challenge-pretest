@@ -1,0 +1,74 @@
+name: HELLO CI
+
+on:
+  push:
+    paths:
+      - "go-hello-world/**"
+      - "deploy/**"
+      - ".github/workflows/action-ci.yaml"
+  pull_request:
+    paths:
+      - "go-hello-world/**"
+      - "deploy/**"
+      - ".github/workflows/action-ci.yaml"
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build application
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: hello-world
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: hello-world/go.mod
+          cache-dependency-path: hello-world/go.mod
+      
+      - name: Check formatting
+        run: go fmt ./...
+      - name: test
+        run: go test ./...
+
+      - name: Build Go application
+        run: go build ./...
+
+  build-and-push-image:
+    needs: build-and-test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+      
+      - name: setup docker
+        uses: docker/setup-buildx-action@v3
+      
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./hello-world
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            - ghcr.io/${{ github.repository_owner }}/hello-world:latest
+            - ghcr.io/${{ github.repository_owner }}/hello-world:${{ github.sha }}
+
+
