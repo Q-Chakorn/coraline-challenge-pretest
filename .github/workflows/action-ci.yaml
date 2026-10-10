@@ -21,7 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: hello-world
+        working-directory: go-hello-world
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
@@ -29,8 +29,8 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: hello-world/go.mod
-          cache-dependency-path: hello-world/go.mod
+          go-version-file: go-hello-world/go.mod
+          cache-dependency-path: go-hello-world/go.mod
       
       - name: Check formatting
         run: go fmt ./...
@@ -64,11 +64,10 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: ./hello-world
+          context: ./go-hello-world
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            - ghcr.io/${{ github.repository_owner }}/hello-world:latest
-            - ghcr.io/${{ github.repository_owner }}/hello-world:${{ github.sha }}
-
+            ghcr.io/${{ github.repository_owner }}/hello-world:latest
+            ghcr.io/${{ github.repository_owner }}/hello-world:${{ github.sha }}
 
