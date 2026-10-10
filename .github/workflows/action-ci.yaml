@@ -68,6 +68,6 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/hello-world:latest
-            ghcr.io/${{ github.repository_owner }}/hello-world:${{ github.sha }}
+            ghcr.io/q-Chakorn/coraline-challenge-pretest/hello-world:latest
+            ghcr.io/q-Chakorn/coraline-challenge-pretest/hello-world:${{ github.sha }}
 
