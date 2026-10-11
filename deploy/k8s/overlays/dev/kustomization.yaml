@@ -17,4 +17,4 @@ patches:
         value: dev.example.com
 images:
   - name: ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world
-    newTag: latest
+    digest: sha256:46a720a51a69c6eaa560e195f5cf8e641db0c7e7ed0dc80826445adc635cc5da
