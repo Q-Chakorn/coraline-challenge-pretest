@@ -19,8 +19,7 @@ spec:
     spec:
       containers:
         - name: hello-world
-          # image: ghcr.io/q-chakorn/ci-workflow-demo:latest
-          image: gohello:test
+          image: ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_ENV
@@ -68,8 +67,7 @@ spec:
     spec:
       containers:
         - name: hello-world
-          # image: ghcr.io/q-chakorn/ci-workflow-demo:latest
-          image: gohello:test
+          image: ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_ENV
@@ -117,8 +115,7 @@ spec:
     spec:
       containers:
         - name: hello-world
-          # image: ghcr.io/q-chakorn/ci-workflow-demo:latest
-          image: gohello:test
+          image: ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world:latest
           imagePullPolicy: IfNotPresent
           env:
             - name: APP_ENV
