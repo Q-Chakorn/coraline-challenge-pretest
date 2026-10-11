@@ -11,7 +11,7 @@ on:
           - staging
           - prod
       image_digest:
-        description: sha256 digest printed by the CI image build
+        description: Image digest from CI, with or without the sha256 prefix
         required: true
         type: string
 
@@ -36,6 +36,9 @@ jobs:
           TARGET_ENVIRONMENT: ${{ inputs.environment }}
           IMAGE_DIGEST: ${{ inputs.image_digest }}
         run: |
+          if [[ "$IMAGE_DIGEST" =~ ^[0-9a-f]{64}$ ]]; then
+            IMAGE_DIGEST="sha256:${IMAGE_DIGEST}"
+          fi
           if ! [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
             echo "Invalid image digest: $IMAGE_DIGEST" >&2
             exit 1

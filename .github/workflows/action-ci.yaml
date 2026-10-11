@@ -94,6 +94,9 @@ jobs:
         env:
           IMAGE_DIGEST: ${{ needs.build-and-push-image.outputs.image_digest }}
         run: |
+          if [[ "$IMAGE_DIGEST" =~ ^[0-9a-f]{64}$ ]]; then
+            IMAGE_DIGEST="sha256:${IMAGE_DIGEST}"
+          fi
           if ! [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
             echo "Invalid image digest: $IMAGE_DIGEST" >&2
             exit 1
