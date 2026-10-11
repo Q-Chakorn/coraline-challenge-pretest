@@ -2,14 +2,14 @@ name: HELLO CI
 
 on:
   push:
+    branches:
+      - master
     paths:
       - "go-hello-world/**"
-      - "deploy/**"
       - ".github/workflows/action-ci.yaml"
   pull_request:
     paths:
       - "go-hello-world/**"
-      - "deploy/**"
       - ".github/workflows/action-ci.yaml"
 
 permissions:
@@ -44,6 +44,8 @@ jobs:
     needs: build-and-test
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     runs-on: ubuntu-latest
+    outputs:
+      image_digest: ${{ steps.build.outputs.digest }}
     permissions:
       contents: read
       packages: write
@@ -62,12 +64,51 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
       
       - name: Build and push Docker image
+        id: build
         uses: docker/build-push-action@v5
         with:
           context: ./go-hello-world
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: |
-            ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world:latest
-            ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world:${{ github.sha }}
+          tags: ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world:${{ github.sha }}
 
+      - name: Publish image digest in the run summary
+        env:
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          echo "Built image: ghcr.io/q-chakorn/coraline-challenge-pretest/hello-world@${IMAGE_DIGEST}" >> "$GITHUB_STEP_SUMMARY"
+          echo "Use this digest as the image_digest input to promote-image for staging, then prod." >> "$GITHUB_STEP_SUMMARY"
+
+  update-dev-image:
+    needs: build-and-push-image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out GitOps repository
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Update dev overlay to the newly built image digest
+        env:
+          IMAGE_DIGEST: ${{ needs.build-and-push-image.outputs.image_digest }}
+        run: |
+          if ! [[ "$IMAGE_DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]; then
+            echo "Invalid image digest: $IMAGE_DIGEST" >&2
+            exit 1
+          fi
+          overlay="deploy/k8s/overlays/dev/kustomization.yaml"
+          sed -i -E "s|^    (newTag|digest): .*|    digest: ${IMAGE_DIGEST}|" "$overlay"
+
+      - name: Commit dev image update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add deploy/k8s/overlays/dev/kustomization.yaml
+          if git diff --cached --quiet; then
+            echo "dev already points to this image"
+            exit 0
+          fi
+          git commit -m "chore(gitops): deploy ${GITHUB_SHA} to dev"
+          git push

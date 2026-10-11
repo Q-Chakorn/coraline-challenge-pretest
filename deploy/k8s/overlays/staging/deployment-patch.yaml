@@ -1,0 +1,15 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hello-world
+spec:
+  template:
+    metadata:
+      labels:
+        environment: staging
+    spec:
+      containers:
+        - name: hello-world
+          env:
+            - name: APP_ENV
+              value: staging

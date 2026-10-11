@@ -21,17 +21,16 @@ Endpoints:
 - `GET /service2` returns `hello world service2 from dev`
 - `GET /healthz` returns `ok` for Kubernetes health probes
 
-Change `APP_ENV` to `staging` or `prod` to see the corresponding response. Build one container image and promote the same immutable image tag or digest through environments; set `APP_ENV` in the environment's Deployment manifest.
+Change `APP_ENV` to `staging` or `prod` to see the corresponding response. Build one container image and promote the same immutable image digest through environments; each Kustomize overlay sets its own `APP_ENV`.
 
-## Kubernetes deployment
+## GitOps deployment and image promotion
 
-The example manifests use the same image for all environments and separate them with `dev`, `staging`, and `prod` namespaces. Replace `ghcr.io/q-chakorn/ci-workflow-demo:latest` with a versioned image tag or digest produced by your build, and replace the example Ingress hosts with real DNS names. An NGINX Ingress Controller must already be installed in the cluster.
+Argo CD has one Application per environment and watches `deploy/k8s/overlays/dev`, `deploy/k8s/overlays/staging`, and `deploy/k8s/overlays/prod`. CI tests the app, builds and pushes one image to GHCR, then updates the `dev` Kustomize overlay to that image's immutable digest. The workflow run summary shows the digest.
 
-```sh
-kubectl apply -f deploy/k8s/namespaces.yaml
-kubectl apply -f deploy/k8s/deployments.yaml
-kubectl apply -f deploy/k8s/services.yaml
-kubectl apply -f deploy/k8s/ingress.yaml
-```
+After validating the image in dev, run the **Promote image** GitHub Actions workflow with environment `staging` and the same `sha256:...` digest. After validating staging, run it again with environment `prod` and that same digest. The workflow checks that the preceding environment already uses the digest, updates only the requested Kustomize overlay, and commits the change for Argo CD to sync. This keeps the promoted artifact identical across environments and makes each change traceable in Git.
 
-Use distinct environment config (and secrets, if added) per namespace. For a release, update the image reference consistently in the three Deployments to the already-built artifact, then promote it from dev to staging to prod.
+The manifests use separate `dev`, `staging`, and `prod` namespaces. Replace the example Ingress hosts with real DNS names. An NGINX Ingress Controller must already be installed in the cluster.
+
+For a local manual deployment, apply each environment overlay with `kubectl apply -k deploy/k8s/overlays/dev` (or `staging` / `prod`).
+
+Use distinct environment config (and secrets, if added) per namespace. Do not update image tags by hand; promote the digest through the GitHub Actions workflow so every environment runs the same built image.

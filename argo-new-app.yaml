@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coraline-challenge
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/q-chakorn/coraline-challenge-pretest.git
+    targetRevision: master
+    path: deploy/k8s/overlays/dev
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coraline-challenge-staging
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/q-chakorn/coraline-challenge-pretest.git
+    targetRevision: master
+    path: deploy/k8s/overlays/staging
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: staging
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: coraline-challenge-prod
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/q-chakorn/coraline-challenge-pretest.git
+    targetRevision: master
+    path: deploy/k8s/overlays/prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
