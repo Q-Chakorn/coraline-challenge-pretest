@@ -54,7 +54,12 @@ jobs:
           fi
 
           overlay="deploy/k8s/overlays/${TARGET_ENVIRONMENT}/kustomization.yaml"
-          sed -i -E "s|^    (newTag|digest): .*|    digest: ${IMAGE_DIGEST}|" "$overlay"
+          awk -v digest="$IMAGE_DIGEST" '
+            /^    (newTag|digest): / { print "    digest: " digest; count++; next }
+            { print }
+            END { if (count != 1) exit 1 }
+          ' "$overlay" > "$overlay.tmp"
+          mv "$overlay.tmp" "$overlay"
 
       - name: Commit promotion
         env:
