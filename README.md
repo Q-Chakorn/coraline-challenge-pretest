@@ -2,6 +2,15 @@
 
 A minimal Go HTTP service with environment-aware demo endpoints and Kubernetes manifests.
 
+## Architecture
+The deployment architecture uses GitHub Actions to build and promote one immutable
+container image through the `dev`, `staging`, and `prod` environments.
+![Kubernetes and GitOps architecture](./mermaid-diagram%20%281%29.png)
+
+Argo CD continuously synchronizes the Kustomize overlays from GitHub into the
+corresponding Kubernetes namespaces.
+![CI/CD image promotion flow](./mermaid-diagram.png)
+
 ## Run locally
 
 ```sh
