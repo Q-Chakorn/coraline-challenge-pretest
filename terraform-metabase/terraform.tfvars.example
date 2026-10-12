@@ -1,0 +1,8 @@
+# Copy this file to terraform.tfvars and adjust it for your environment.
+aws_region   = "ap-southeast-1"
+project_name = "metabase-demo"
+
+tags = {
+  Environment = "demo"
+  Owner       = "your-name"
+}
