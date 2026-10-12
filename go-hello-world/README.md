@@ -43,6 +43,6 @@ The manifests use separate `dev`, `staging`, and `prod` namespaces. Replace the 
 
 For a local manual deployment, apply each environment overlay with `kubectl apply -k deploy/k8s/overlays/dev` (or `staging` / `prod`).
 
-ใช้การกำหนดค่าสภาพแวดล้อมที่แตกต่างกัน (รวมถึงซีเคร็ต หากมีการเพิ่ม) สำหรับแต่ละเนมสเปซ อย่าอัปเดตแท็กอิมเมจด้วยตนเอง ให้เลื่อนไดเจสต์ผ่านเวิร์กโฟลว์ GitHub Actions เพื่อให้ทุกสภาพแวดล้อมใช้อิมเมจที่สร้างขึ้นเดียวกัน
+ใช้การกำหนดค่าสภาพแวดล้อมที่แตกต่างกัน (รวมถึงซีเคร็ต หากมีการเพิ่ม) สำหรับแต่ละ namespace อย่าอัปเดตแท็กอิมเมจด้วยตนเอง ให้ Promote image ผ่านเวิร์กโฟลว์ GitHub Actions เพื่อให้ทุกสภาพแวดล้อมใช้อิมเมจที่สร้างขึ้นเดียวกัน
 
 Use distinct environment config (and secrets, if added) per namespace. Do not update image tags by hand; promote the digest through the GitHub Actions workflow so every environment runs the same built image.
